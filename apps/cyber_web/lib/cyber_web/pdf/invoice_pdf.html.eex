@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title><%= @title %></title>
+    <style>
+        body {
+            font-family: 'DejaVu Sans', sans-serif;
+            font-size: 10px;
+            color: #333;
+        }
+        .container {
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+        }
+        .header .title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .details {
+            margin-bottom: 30px;
+        }
+        .parties {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        .parties div {
+            width: 48%;
+        }
+        .parties h3 {
+            font-size: 12px;
+            font-weight: bold;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        .items-table th, .items-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: right;
+        }
+        .items-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .items-table th:nth-child(2) {
+            text-align: left;
+        }
+        .items-table td:nth-child(2) {
+            text-align: left;
+        }
+        .totals {
+            float: right;
+            width: 250px;
+        }
+        .totals table {
+            width: 100%;
+        }
+        .totals td {
+            padding: 5px;
+        }
+        .totals .label {
+            text-align: right;
+            font-weight: bold;
+        }
+        .totals .amount {
+            text-align: right;
+        }
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <% # Placeholder for a logo %>
+                <% # <img src="logo.png" style="width: 150px;"> %>
+            </div>
+            <div class="title">
+                <%= @title %> ОРИГИНАЛ
+            </div>
+        </div>
+
+        <div class="details">
+            <p><strong>Номер:</strong> <%= @invoice["invoice_no"] %></p>
+            <p><strong>Дата:</strong> <%= @invoice["issue_date"] %></p>
+            <p><strong>Дата на данъчно събитие:</strong> <%= @invoice["tax_event_date"] %></p>
+            <p><strong>Краен срок за плащане:</strong> <%= @invoice["due_date"] %></p>
+        </div>
+
+        <div class="parties">
+            <div>
+                <h3>ПОЛУЧАТЕЛ</h3>
+                <p><strong><%= @invoice["billing_name"] %></strong></p>
+                <p>Идент. No: <%= @invoice["billing_company_id"] || "Н/Д" %></p>
+                <p>ДДС No: <%= @invoice["billing_vat_number"] || "Н/Д" %></p>
+                <p>Адрес: <%= @invoice["billing_address"] %></p>
+            </div>
+            <div>
+                <h3>ДОСТАВЧИК</h3>
+                <p><strong>ИНФОРМЕЙТ ЕООД</strong></p>
+                <p>Идент. No: 201559838</p>
+                <p>ДДС No: </p>
+                <p>Адрес: ул.Верила №18</p>
+                <p>Град: гр. Пазарджик</p>
+                <p>Държава: БЪЛГАРИЯ</p>
+            </div>
+        </div>
+
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th style="width: 30px;">No</th>
+                    <th>Стока/Услуга</th>
+                    <th style="width: 50px;">К-во</th>
+                    <th style="width: 70px;">Единица</th>
+                    <th style="width: 80px;">Цена</th>
+                    <th style="width: 80px;">Сума</th>
+                </tr>
+            </thead>
+            <tbody>
+                <%= for {line, index} <- Enum.with_index(@invoice["lines"] || []) do %>
+                <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= line["description"] %></td>
+                    <td><%= line["quantity"] %></td>
+                    <td>брой</td>
+                    <td><%= line["unit_price"] %></td>
+                    <td><%= line["subtotal_str"] %></td>
+                </tr>
+                <% end %>
+            </tbody>
+        </table>
+
+        <div class="totals">
+            <table>
+                <tr>
+                    <td class="label">Данъчна основа:</td>
+                    <td class="amount"><%= @invoice["subtotal"] || "0.00" %> <%= @invoice["currency"] %></td>
+                </tr>
+                <tr>
+                    <td class="label">ДДС (0%):</td>
+                    <td class="amount"><%= @invoice["tax_amount"] || "0.00" %> <%= @invoice["currency"] %></td>
+                </tr>
+                <tr>
+                    <td class="label" style="font-size: 14px;">Сума за плащане:</td>
+                    <td class="amount" style="font-size: 14px; font-weight: bold;"><%= @invoice["total_amount"] || "0.00" %> <%= @invoice["currency"] %></td>
+                </tr>
+            </table>
+        </div>
+
+        <div style="clear: both;"></div>
+
+        <div class="footer">
+            <div>
+                <p><strong>Основание за неначисляване на ДДС:</strong></p>
+                <p><%= @invoice["vat_reason"] %></p>
+                <br/>
+                <p><strong>Плащане:</strong> <%= @invoice["payment_method"] %></p>
+                <p><strong>IBAN:</strong> <%= @invoice["bank_account_iban"] %></p>
+                <p><strong>Банка:</strong> <%= @invoice["bank_account_name"] %></p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div>
+                <p>Получил: ......................................</p>
+                <p style="font-size: 8px;">(име, подпис)</p>
+            </div>
+            <div>
+                <p>Съставил: ......................................</p>
+                <p style="font-size: 8px;">(име, подпис)</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

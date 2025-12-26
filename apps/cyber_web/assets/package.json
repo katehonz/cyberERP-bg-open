@@ -1,0 +1,22 @@
+{
+  "name": "cyber_erp_web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "deploy": "cd .. && mix assets.deploy && rm -f _build/esbuild*"
+  },
+  "dependencies": {
+    "phoenix": "file:../../../deps/phoenix",
+    "phoenix_html": "file:../../../deps/phoenix_html",
+    "phoenix_live_view": "file:../../../deps/phoenix_live_view",
+    "alpinejs": "^3.13.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "recharts": "^2.9.0",
+    "@tanstack/react-table": "^8.10.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0"
+  }
+}

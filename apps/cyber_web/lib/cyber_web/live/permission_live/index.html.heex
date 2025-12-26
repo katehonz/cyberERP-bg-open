@@ -1,0 +1,88 @@
+<div class="px-4 sm:px-6 lg:px-8">
+  <div class="sm:flex sm:items-center">
+    <div class="sm:flex-auto">
+      <h1 class="text-2xl font-semibold text-gray-900">Управление на права</h1>
+      <p class="mt-2 text-sm text-gray-700">
+        Управление на права за достъп по роли. Промените се записват автоматично.
+      </p>
+    </div>
+  </div>
+
+  <div class="mt-8 flow-root">
+    <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+      <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+        <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+          <.form for={%{}} as={:permissions} phx-change="update_permissions">
+            <table class="min-w-full divide-y divide-gray-300">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                    Права
+                  </th>
+                  <%= for role <- @roles do %>
+                    <th scope="col" class="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
+                      <span class={"inline-flex items-center rounded-full px-3 py-1 text-xs font-medium #{role_badge_class(role)}"}>
+                        <%= format_role(role) %>
+                      </span>
+                    </th>
+                  <% end %>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 bg-white">
+                <%= for {group, perms} <- group_permissions(@permissions) do %>
+                  <tr class="bg-gray-50">
+                    <td colspan={length(@roles) + 1} class="py-2 pl-4 pr-3 text-sm font-bold text-gray-700 sm:pl-6">
+                      <%= format_group(group) %>
+                    </td>
+                  </tr>
+                  <%= for permission <- perms do %>
+                    <tr class="hover:bg-gray-50">
+                      <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
+                        <div class="font-medium text-gray-900"><%= format_permission_name(permission.name) %></div>
+                        <div class="text-gray-500 text-xs"><%= permission.description %></div>
+                      </td>
+                      <%= for role <- @roles do %>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-center">
+                          <label class="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              name={"permissions[#{role}][#{permission.name}]"}
+                              value="true"
+                              checked={permission.name in @role_permissions[role]}
+                              class="sr-only peer"
+                            />
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                          </label>
+                        </td>
+                      <% end %>
+                    </tr>
+                  <% end %>
+                <% end %>
+              </tbody>
+            </table>
+          </.form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-6 flex items-center justify-between bg-gray-50 rounded-lg p-4">
+    <div class="text-sm text-gray-600">
+      <span class="font-medium">Общо права:</span> <%= length(@permissions) %>
+    </div>
+    <div class="flex gap-4 text-sm">
+      <div>
+        <span class="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800">Администратор</span>
+        <span class="ml-1 text-gray-600">- Пълен достъп</span>
+      </div>
+      <div>
+        <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">Потребител</span>
+        <span class="ml-1 text-gray-600">- Преглед и създаване</span>
+      </div>
+      <div>
+        <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">Наблюдател</span>
+        <span class="ml-1 text-gray-600">- Само преглед</span>
+      </div>
+    </div>
+  </div>
+</div>

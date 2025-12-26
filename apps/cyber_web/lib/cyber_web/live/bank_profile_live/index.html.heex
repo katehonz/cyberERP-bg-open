@@ -1,0 +1,170 @@
+<div class="mx-auto max-w-6xl">
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-semibold text-zinc-900">Банкови профили</h1>
+      <p class="mt-1 text-sm text-zinc-600">Управление на банкови сметки и автоматична синхронизация</p>
+    </div>
+    <.link patch={~p"/bank-profiles/new"} class="inline-flex items-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-700">
+      <span class="mr-2">+</span> Нов профил
+    </.link>
+  </div>
+
+  <div class="grid gap-6">
+    <%= for profile <- @bank_profiles do %>
+      <div class="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
+        <div class="border-b border-zinc-200 bg-zinc-50 px-6 py-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-zinc-900"><%= profile.name %></h3>
+              <p class="mt-1 text-sm text-zinc-600">
+                <%= if profile.iban do %>
+                  IBAN: <%= profile.iban %>
+                <% end %>
+                <%= if profile.bank_name do %>
+                  • <%= profile.bank_name %>
+                <% end %>
+              </p>
+            </div>
+            <div class="flex items-center gap-3">
+              <%= if profile.auto_sync_enabled do %>
+                <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
+                  <div class="mr-1.5 h-2 w-2 rounded-full bg-green-500"></div>
+                  Автоматична синхронизация
+                </span>
+              <% else %>
+                <span class="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-800">
+                  Ръчен импорт
+                </span>
+              <% end %>
+
+              <%= if profile.saltedge_connection_id do %>
+                <button
+                  phx-click="sync_now"
+                  phx-value-id={profile.id}
+                  class="inline-flex items-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+                >
+                  🔄 Синхронизирай сега
+                </button>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <div class="px-6 py-4">
+          <dl class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div>
+              <dt class="text-xs font-medium text-zinc-500">Валута</dt>
+              <dd class="mt-1 text-sm text-zinc-900"><%= profile.currency_code %></dd>
+            </div>
+
+            <div>
+              <dt class="text-xs font-medium text-zinc-500">Банкова сметка</dt>
+              <dd class="mt-1 text-sm text-zinc-900">
+                <%= if profile.bank_account do %>
+                  <%= profile.bank_account.code %> - <%= profile.bank_account.name %>
+                <% else %>
+                  <span class="text-zinc-400">Не е зададена</span>
+                <% end %>
+              </dd>
+            </div>
+
+            <div>
+              <dt class="text-xs font-medium text-zinc-500">Буферна сметка</dt>
+              <dd class="mt-1 text-sm text-zinc-900">
+                <%= if profile.buffer_account do %>
+                  <%= profile.buffer_account.code %> - <%= profile.buffer_account.name %>
+                <% else %>
+                  <span class="text-zinc-400">Не е зададена</span>
+                <% end %>
+              </dd>
+            </div>
+
+            <%= if profile.import_format do %>
+              <div>
+                <dt class="text-xs font-medium text-zinc-500">Формат за импорт</dt>
+                <dd class="mt-1 text-sm text-zinc-900"><%= String.upcase(profile.import_format) %></dd>
+              </div>
+            <% end %>
+
+            <%= if profile.last_synced_at do %>
+              <div>
+                <dt class="text-xs font-medium text-zinc-500">Последна синхронизация</dt>
+                <dd class="mt-1 text-sm text-zinc-900">
+                  <%= Calendar.strftime(profile.last_synced_at, "%d.%m.%Y %H:%M") %>
+                </dd>
+              </div>
+            <% end %>
+
+            <%= if profile.saltedge_connection_id do %>
+              <div>
+                <dt class="text-xs font-medium text-zinc-500">Salt Edge</dt>
+                <dd class="mt-1 flex items-center text-sm">
+                  <%= if profile.bank_connection && profile.bank_connection.status == "active" do %>
+                    <span class="inline-flex items-center text-green-600">
+                      <div class="mr-1 h-2 w-2 rounded-full bg-green-500"></div>
+                      Свързан
+                    </span>
+                  <% else %>
+                    <span class="inline-flex items-center text-red-600">
+                      <div class="mr-1 h-2 w-2 rounded-full bg-red-500"></div>
+                      Изисква повторна връзка
+                    </span>
+                  <% end %>
+                </dd>
+              </div>
+            <% end %>
+          </dl>
+        </div>
+
+        <div class="border-t border-zinc-200 bg-zinc-50 px-6 py-3">
+          <div class="flex items-center justify-end gap-3">
+            <.link navigate={~p"/bank-imports?profile_id=#{profile.id}"} class="text-sm text-zinc-600 hover:text-zinc-900">
+              Импорти
+            </.link>
+            <.link navigate={~p"/bank-transactions?profile_id=#{profile.id}"} class="text-sm text-zinc-600 hover:text-zinc-900">
+              Транзакции
+            </.link>
+            <.link patch={~p"/bank-profiles/#{profile}/edit"} class="text-sm text-zinc-600 hover:text-zinc-900">
+              Редактирай
+            </.link>
+            <a
+              href="#"
+              phx-click="delete"
+              phx-value-id={profile.id}
+              data-confirm="Сигурни ли сте?"
+              class="text-sm text-red-600 hover:text-red-900"
+            >
+              Изтрий
+            </a>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <%= if Enum.empty?(@bank_profiles) do %>
+      <div class="rounded-lg border-2 border-dashed border-zinc-300 bg-zinc-50 p-12 text-center">
+        <div class="mx-auto max-w-md">
+          <h3 class="text-lg font-semibold text-zinc-900">Няма банкови профили</h3>
+          <p class="mt-2 text-sm text-zinc-600">
+            Създайте банков профил за автоматична синхронизация през Salt Edge или ръчен импорт на файлове.
+          </p>
+          <.link patch={~p"/bank-profiles/new"} class="mt-4 inline-flex items-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-700">
+            <span class="mr-2">+</span> Създай първи профил
+          </.link>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<.modal :if={@live_action in [:new, :edit]} id="bank-profile-modal" show on_cancel={~p"/bank-profiles"}>
+  <.live_component
+    module={CyberWeb.BankProfileLive.FormComponent}
+    id={@bank_profile.id || :new}
+    title={@page_title}
+    action={@live_action}
+    bank_profile={@bank_profile}
+    current_tenant_id={@current_tenant_id}
+    patch={~p"/bank-profiles"}
+  />
+</.modal>

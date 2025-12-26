@@ -1,0 +1,103 @@
+<div class="mx-auto max-w-6xl">
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-semibold text-zinc-900">Фирми</h1>
+      <p class="mt-1 text-sm text-zinc-600">Управление на фирмите в системата</p>
+    </div>
+    <.link patch={~p"/tenants/new"} class="inline-flex items-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-700">
+      <span class="mr-2">+</span> Нова фирма
+    </.link>
+  </div>
+
+  <div class="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
+    <table class="min-w-full divide-y divide-zinc-200">
+      <thead class="bg-zinc-50">
+        <tr>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">
+            Име
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">
+            Slug
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">
+            Основна валута
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">
+            Еврозона
+          </th>
+          <th scope="col" class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-zinc-500">
+            Активна
+          </th>
+          <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-zinc-500">
+            Действия
+          </th>
+        </tr>
+      </thead>
+      <tbody id="tenants" phx-update="stream" class="divide-y divide-zinc-200 bg-white">
+        <tr :for={{dom_id, tenant} <- @streams.tenants} id={dom_id} class={"hover:bg-zinc-50 #{if tenant.id == @current_tenant_id, do: "bg-green-50"}"}>
+          <td class="whitespace-nowrap px-6 py-4">
+            <div class="flex items-center">
+              <div :if={tenant.id == @current_tenant_id} class="mr-2 h-2 w-2 rounded-full bg-green-500"></div>
+              <div class="text-sm font-medium text-zinc-900"><%= tenant.name %></div>
+            </div>
+            <div :if={tenant.id == @current_tenant_id} class="mt-1 text-xs text-green-600">Текуща фирма</div>
+          </td>
+          <td class="whitespace-nowrap px-6 py-4">
+            <div class="text-sm text-zinc-500"><%= tenant.slug %></div>
+          </td>
+          <td class="whitespace-nowrap px-6 py-4">
+            <div class="text-sm text-zinc-900"><%= tenant.base_currency_code %></div>
+          </td>
+          <td class="whitespace-nowrap px-6 py-4">
+            <span :if={tenant.in_eurozone} class="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">
+              Да
+            </span>
+            <span :if={!tenant.in_eurozone} class="inline-flex rounded-full bg-gray-100 px-2 text-xs font-semibold leading-5 text-gray-800">
+              Не
+            </span>
+          </td>
+          <td class="whitespace-nowrap px-6 py-4 text-center">
+            <div :if={tenant.id == @current_tenant_id} class="flex items-center justify-center space-x-2">
+              <div class="h-4 w-4 rounded-full bg-green-500"></div>
+              <span class="text-xs text-green-600">Текуща</span>
+            </div>
+            <button
+              :if={tenant.id != @current_tenant_id}
+              phx-click="set_active"
+              phx-value-id={tenant.id}
+              class="rounded px-2 py-1 text-sm text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+            >
+              Направи активна
+            </button>
+          </td>
+          <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+            <.link patch={~p"/tenants/#{tenant}/edit"} class="text-zinc-600 hover:text-zinc-900">
+              Редактирай
+            </.link>
+            <a
+              :if={tenant.id != @current_tenant_id}
+              href="#"
+              phx-click="delete"
+              phx-value-id={tenant.id}
+              data-confirm="Сигурни ли сте?"
+              class="ml-4 text-red-600 hover:text-red-900"
+            >
+              Изтрий
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<.modal :if={@live_action in [:new, :edit]} id="tenant-modal" show on_cancel={~p"/tenants"}>
+  <.live_component
+    module={CyberWeb.TenantLive.FormComponent}
+    id={@tenant.id || :new}
+    title={@page_title}
+    action={@live_action}
+    tenant={@tenant}
+    patch={~p"/tenants"}
+  />
+</.modal>
