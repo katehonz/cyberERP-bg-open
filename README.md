@@ -5,7 +5,7 @@
 [![Elixir Version](https://img.shields.io/badge/Elixir-1.16%2B-purple.svg)](https://elixir-lang.org)
 [![Phoenix Framework](https://img.shields.io/badge/Phoenix-1.7%2B-orange.svg)](https://www.phoenixframework.org)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14%2B-blue.svg)](https://www.postgresql.org)
-[![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ---
 
@@ -390,7 +390,7 @@ mix compile
 
 ## 📄 Лиценз
 
-Proprietary - Всички права запазени.
+MIT License - Вижте [LICENSE](LICENSE) файла за подробности.
 
 ---
 
